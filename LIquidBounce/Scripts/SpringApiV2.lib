@@ -1,0 +1,72 @@
+// SPRING API V2
+
+var plr = mc.thePlayer
+var timer = mc.timer
+var gameSettings = mc.gameSettings
+
+function setSpeed(Speed, IsStrafing) {plr.motionX *= Speed; plr.motionZ *= Speed; if (IsStrafing == true) {plr.onGround = true}}
+function sendNewPacket(Packet) {plr.sendQueue.addToSendQueue(Packet)}
+function setPlayerPosition(PositionX, PositionY, PositionZ) {plr.setPosition(PositionX, PositionY, PositionZ)}
+function addToChat(Message) {Chat.print(Message)}
+
+function IsMoving() {
+    return plr.moveForward != 0 || plr.moveStrafing != 0
+}
+
+function getDirectionVector() {
+    var yaw = plr.rotationYaw * (Math.PI / 180);
+    return {
+        x: -Math.sin(yaw),
+        z: Math.cos(yaw)
+    };
+}
+
+function getStrafeVector() {
+    var yaw = plr.rotationYaw * (Math.PI / 180);
+    return {
+        x: Math.cos(yaw),
+        z: Math.sin(yaw)
+    };
+}
+
+function strafe(v) {
+    var dir = getDirectionVector();
+    var strafeDir = getStrafeVector();
+    var forward = plr.moveForward;
+    var strafeAmount = plr.moveStrafing;
+
+    var x = dir.x * forward + strafeDir.x * strafeAmount;
+    var z = dir.z * forward + strafeDir.z * strafeAmount;
+
+    var length = Math.sqrt(x * x + z * z);
+    if (length != 0) {
+        x /= length;
+        z /= length;
+    }
+
+    plr.motionX = x * v;
+    plr.motionZ = z * v;
+}
+
+var Packets = [
+    C00PacketKeepAlive = Java.type("net.minecraft.network.play.client.C00PacketKeepAlive"),
+    C02PacketUseEntity = Java.type("net.minecraft.network.play.client.C02PacketUseEntity"),
+    C03PacketPlayer = Java.type("net.minecraft.network.play.client.C03PacketPlayer"),
+    C04PacketPlayerPosition = Java.type("net.minecraft.network.play.client.C03PacketPlayer.C04PacketPlayerPosition"),
+    C05PacketPlayerLook = Java.type("net.minecraft.network.play.client.C03PacketPlayer.C05PacketPlayerLook"),
+    C06PacketPlayerPosLook = Java.type("net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook"),
+    C0APacketAnimation = Java.type("net.minecraft.network.play.client.C0APacketAnimation"),
+    C0BPacketEntityAction = Java.type("net.minecraft.network.play.client.C0BPacketEntityAction"),
+    C0CPacketInput = Java.type("net.minecraft.network.play.client.C0CPacketInput"),
+    C0DPacketCloseWindow = Java.type("net.minecraft.network.play.client.C0DPacketCloseWindow"),
+    C0EPacketClickWindow = Java.type("net.minecraft.network.play.client.C0EPacketClickWindow"),
+    C0FPacketConfirmTransaction = Java.type("net.minecraft.network.play.client.C0FPacketConfirmTransaction"),
+    C07PacketPlayerDigging = Java.type("net.minecraft.network.play.client.C07PacketPlayerDigging"),
+    C08PacketPlayerBlockPlacement = Java.type("net.minecraft.network.play.client.C08PacketPlayerBlockPlacement"),
+    C09PacketHeldItemChange = Java.type("net.minecraft.network.play.client.C09PacketHeldItemChange"),
+    C16PacketClientStatus = Java.type("net.minecraft.network.play.client.C16PacketClientStatus"),
+    C17PacketCustomPayload = Java.type("net.minecraft.network.play.client.C17PacketCustomPayload"),
+    C18PacketSpectate = Java.type("net.minecraft.network.play.client.C18PacketSpectate"),
+    S12PacketEntityVelocity = Java.type('net.minecraft.network.play.server.S12PacketEntityVelocity'),
+    S18PacketEntityTeleport = Java.type("net.minecraft.network.play.server.S18PacketEntityTeleport"),
+]
